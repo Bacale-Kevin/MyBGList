@@ -16,6 +16,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+if (app.Configuration.GetValue<bool>("UseDeveloperExceptionPage"))
+    app.UseDeveloperExceptionPage();
+else
+    app.UseExceptionHandler("/error");
+
+app.MapGet("/error", () => Results.Problem()); // JSON file containing usefull info regarding errors
+app.MapGet("/error/test", () => { throw new Exception("test"); });
+
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
