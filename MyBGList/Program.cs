@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,9 +41,16 @@ if (app.Configuration.GetValue<bool>("UseDeveloperExceptionPage"))
 else
     app.UseExceptionHandler("/error");
 
-app.MapGet("/error", [EnableCors("AnyOrigin")] () => Results.Problem()); // JSON file containing usefull info regarding errors
+app.MapGet("/error",
+    [EnableCors("AnyOrigin")]
+[ResponseCache(NoStore = true)] // It makes no sense to cache error respnse routes, Prevent anyone from caching 
+() => Results.Problem()); //  JSON file containing usefull info regarding errors
 
-app.MapGet("/error/test", [EnableCors("AnyOrigin")] () => { throw new Exception("test"); });
+app.MapGet("/error/test",
+    [EnableCors("AnyOrigin")]
+[ResponseCache(NoStore = true)] // Prevent anyone from caching
+() =>
+    { throw new Exception("test"); });
 
 
 app.UseHttpsRedirection();

@@ -15,7 +15,7 @@ namespace MyBGList.Controllers
         }
 
         [HttpGet(Name = "GetBoardGames")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60)] // Caching this route for 1minute
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60)]
         public RestDTO<BoardGame[]> Get()
         {
             return new RestDTO<BoardGame[]>()
