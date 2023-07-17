@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyBGList.DTO;
+using MyBGList.Models;
 
 namespace MyBGList.Controllers
 {
@@ -42,7 +43,7 @@ namespace MyBGList.Controllers
 
                 Links = new List<LinkDTO> {
                     new LinkDTO(
-                                Url.Action(null, "BoardGames", null, Request.Scheme)!,
+                                Url.Action(null, "BoardGames", null, Request.Scheme)!, // Returns the URL endpoint
                                 "self",
                                 "GET"
                                 ),
