@@ -31,7 +31,7 @@ namespace MyBGList.Models
         public int MinAge { get; set; }
 
         [Required]
-        public int UserRated { get; set; }
+        public int UsersRated { get; set; }
 
         [Required]
         [Precision(4, 2)]
