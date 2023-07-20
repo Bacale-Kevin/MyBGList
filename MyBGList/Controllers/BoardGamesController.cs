@@ -50,5 +50,69 @@ namespace MyBGList.Controllers
             };
         }
 
+        [HttpPost(Name = "UpdateBoardGame")]
+        [ResponseCache(NoStore = true)]
+        public async Task<RestDTO<BoardGame?>> Post(BoardGameDTO model)
+        {
+            var boardGame = await _context.BoardGames
+                .Where(b => b.Id == model.Id)
+                .FirstOrDefaultAsync();
+
+            if (boardGame != null)
+            {
+                if (!string.IsNullOrEmpty(model.Name))
+                    boardGame.Name = model.Name;
+
+                if (model.Year.HasValue && model.Year > 0)
+                    boardGame.Year = model.Year.Value;
+
+                boardGame.LastModifiedDate = DateTime.Now;
+
+                _context.BoardGames.Update(boardGame);
+                await _context.SaveChangesAsync();
+            }
+
+            return new RestDTO<BoardGame?>
+            {
+                Data = boardGame,
+                Links = new List<LinkDTO>
+                {
+                    new LinkDTO(
+                        Url.Action(null, "BoardGames", model, Request.Scheme)!,
+                         "self",
+                         "POST"
+                         )
+                }
+            };
+        }
+
+        [HttpDelete(Name = "DeleteBoardGame")]
+        [ResponseCache(NoStore = true)]
+        public async Task<RestDTO<BoardGame?>> Delete(int id)
+        {
+            var boardGame = await _context.BoardGames
+                    .Where(b => b.Id == id)
+                    .FirstOrDefaultAsync();
+
+            if (boardGame != null)
+            {
+                _context.BoardGames.Remove(boardGame);
+                await _context.SaveChangesAsync();
+            }
+
+            return new RestDTO<BoardGame?>
+            {
+                Data = boardGame,
+                Links = new List<LinkDTO>
+                {
+                    new LinkDTO(
+                        Url.Action(null, "BoardGames", id, Request.Scheme)!,
+                         "self",
+                         "DELETE"
+                         )
+                }
+            };
+        }
+
     }
 }
