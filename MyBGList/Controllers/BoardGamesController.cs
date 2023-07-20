@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MyBGList.Attributes;
 using MyBGList.DataContext;
 using MyBGList.DTO;
 using MyBGList.Models;
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Dynamic.Core;
 
 namespace MyBGList.Controllers
@@ -23,26 +25,26 @@ namespace MyBGList.Controllers
 
         [HttpGet(Name = "GetBoardGames")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 60)] // Caching this route for 1minute
-        public async Task<RestDTO<BoardGame[]>> Get(int pageNumber = 0, int pageSize = 10, string? sortColumn = "Name", string? sortOrder = "ASC", string? filterQuery = null)
+        public async Task<RestDTO<BoardGame[]>> Get([FromQuery] RequestDTO<BoardGameDTO> input)
         {
 
             var query = _context.BoardGames.AsQueryable();
-            if (!string.IsNullOrEmpty(filterQuery))
-                query = query.Where(b => b.Name.Contains(filterQuery));
+            if (!string.IsNullOrEmpty(input.FilterQuery))
+                query = query.Where(b => b.Name.Contains(input.FilterQuery));
             var recordCount = await query.CountAsync();
             query = query
-            .OrderBy($"{sortColumn} {sortOrder}")
-            .Skip(pageNumber * pageSize)
-            .Take(pageSize);
+            .OrderBy($"{input.SortColumn} {input.SortOrder}")
+            .Skip(input.PageNumber * input.PageSize)
+            .Take(input.PageSize);
 
             return new RestDTO<BoardGame[]>()
             {
                 Data = await query.ToArrayAsync(),
-                PageNumber = pageNumber,
-                PageSize = pageSize,
+                PageNumber = input.PageNumber,
+                PageSize = input.PageSize,
                 RecordCount = recordCount,
                 Links = new List<LinkDTO> {
-                                new LinkDTO(Url.Action(null, "BoardGames", new { pageNumber, pageSize }, Request.Scheme)!,
+                                new LinkDTO(Url.Action(null, "BoardGames", new { input.PageNumber, input.PageSize }, Request.Scheme)!,
                                             "self",
                                              "GET"
                                                ),
