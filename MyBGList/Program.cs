@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyBGList.DataContext;
+using MyBGList.Swagger;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,10 +12,22 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 options.UseSqlServer(
 builder.Configuration.GetConnectionString("DefaultConnection"))
 );
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => {
+    options.ModelBindingMessageProvider.SetValueIsInvalidAccessor(
+    (x) => $"The value '{x}' is invalid.");
+    options.ModelBindingMessageProvider.SetValueMustBeANumberAccessor(
+    (x) => $"The field {x} must be a number.");
+    options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor(
+    (x, y) => $"The value '{x}' is not valid for {y}.");
+    options.ModelBindingMessageProvider.SetMissingKeyOrValueAccessor(
+    () => $"A value is required.");
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options => {
+    options.ParameterFilter<SortColumnFilter>();
+options.ParameterFilter<SortOrderFilter>();
+});
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(cfg =>
@@ -31,6 +45,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+// TThis suppresses the filter of the APIController that always returns a 400 status code when validation errors are found
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+options.SuppressModelStateInvalidFilter = true);
 
 var app = builder.Build();
 
